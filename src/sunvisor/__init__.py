@@ -52,8 +52,8 @@ class BadSun:
         times = start_time + time_deltas
         frames = AltAz(obstime=times, location=self.loc)
         alts = self.get_sun(times).transform_to(frames)
-        low_az = self.azimuth - self.tol * 1.5
-        hi_az = self.azimuth + self.tol * 1.5
+        low_az = self.azimuth - self.tol * 1.5  # noqa: F841
+        hi_az = self.azimuth + self.tol * 1.5  # noqa: F841
 
         self.coarse = (
             alts.to_table()
@@ -84,9 +84,10 @@ class BadSun:
         self.fine = pl.concat(fine)
 
     def make_summary_table(self):
+        """Use polars to make the summary table."""
         if self.fine is None:
             self.high_res_run()
-        header_name = 'Bad Times'
+        header_name = 'Times'
 
         fmt2 = '%-I:%M%p'
         fine = self.fine
@@ -109,9 +110,10 @@ class BadSun:
         )
 
     def summary_table(self, return_all=False):
+        """Return the summary table"""
         if self.summary_table_data is None:
             self.make_summary_table()
-        header_name = 'Bad Times'
+        header_name = 'Times'
         cols = ['Day', header_name] if not return_all else self.summary_table_data.columns
         return self.summary_table_data.select(cols)
 
