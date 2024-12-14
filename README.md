@@ -2,7 +2,7 @@
 
 This module uses `astropy` to compute when the sun is low on the horizon in a specific direction. I wrote it because recently I drove down a local road directly into the setting sun, and I wanted to know when during the evening that would happen and for how much longer.
 
-However, it could be used for fun uses like finding a sunset that lines up with a particular monument.
+However, it could be used for fun uses like finding a sunset that lines up with a particular building, statue, or monument.
 
 **Install**
 
