@@ -135,6 +135,6 @@ class LowSun:
             .tab_spanner('Times', columns=['Start', 'End'])
             .tab_spanner('Altitude', columns=['Min', 'Max'])
             .tab_source_note(
-                source_note=f'Computed using astropy for Lat {self.lat:.3f}{degree_sign}, Lon: {self.lon:.3f}{degree_sign}'
+                source_note=f'Computed using astropy for Lat: {self.lat:.3f}{degree_sign}, Lon: {self.lon:.3f}{degree_sign}'
             )
         )
