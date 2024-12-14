@@ -9,7 +9,7 @@ from tqdm.autonotebook import tqdm
 from great_tables import GT
 
 
-class BadSun:
+class LowSun:
     summary_table_data = None
     fine = None
     coarse = None
