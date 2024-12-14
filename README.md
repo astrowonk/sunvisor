@@ -6,6 +6,8 @@ However, it could be used for more fun things like finding a sunset that lines u
 
 **INSTALLATION**
 
+
+
 Clone this repository and then pip should work. Requirements are `astropy`, `pandas`, `polars` and `great_tables`. I may make `great_tables` optional at some point.
 
 `pip install .`
@@ -16,6 +18,8 @@ Clone this repository and then pip should work. Requirements are `astropy`, `pan
 Here is simple example to make a table for [Manhattanhenge](https://www.amnh.org/research/hayden-planetarium/manhattanhenge), when the sun lines up with the east west grid of the city.
 
 ```{python}
+from sunvisor import LowSun
+
 lat =   40.757841
 lon = -73.985253
 #az = 238.79
