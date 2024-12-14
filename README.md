@@ -6,12 +6,9 @@ However, it could be used for more fun things like finding a sunset that lines u
 
 **INSTALLATION**
 
-
-
 Clone this repository and then pip should work. Requirements are `astropy`, `pandas`, `polars` and `great_tables`. I may make `great_tables` optional at some point.
 
 `pip install .`
-
 
 **USAGE**
 
