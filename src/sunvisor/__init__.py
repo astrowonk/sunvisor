@@ -58,7 +58,7 @@ class BadSun:
         self.coarse = (
             alts.to_table()
             .to_pandas()
-            .query('(0 <= alt < @self.max_elevation) and (@self.low_az < az < @self.hi_az)')
+            .query('(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)')
         )
 
     def high_res_run(self):
@@ -122,9 +122,17 @@ class BadSun:
         data = self.summary_table_data.rename(
             {'start_str': 'Start', 'end_str': 'End', 'Min Alt': 'Min', 'Max Alt': 'Max'}
         ).select(['Day', 'Start', 'End', 'Min', 'Max'])
+        degree_sign = '\N{DEGREE SIGN}'
         return (
             GT(data)
+            .tab_header(
+                title=f'Sun below {self.max_alt}{degree_sign}',
+                subtitle=f'Direction between {self.azimuth-self.tol:.2f}{degree_sign} and {self.azimuth+self.tol:.2f}{degree_sign}',
+            )
             .fmt_number(columns=['Min', 'Max'], decimals=2, use_seps=False)
-            .tab_spanner('Sun in Eyes', columns=['Start', 'End'])
+            .tab_spanner('Times', columns=['Start', 'End'])
             .tab_spanner('Altitude', columns=['Min', 'Max'])
+            .tab_source_note(
+                source_note=f'Computed using astropy for Lat {self.lat:.3f}{degree_sign}, Lon: {self.lon:.3f}{degree_sign}'
+            )
         )
