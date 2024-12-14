@@ -1,6 +1,6 @@
-from astropy.coordinates import get_sun
+from astropy.coordinates import get_sun, get_body
 import astropy.units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord, solar_system_ephemeris
 from astropy.time import Time
 import datetime
 import numpy as np
@@ -14,24 +14,51 @@ class BadSun:
     fine = None
     coarse = None
 
-    def __init__(self, lat, lon, azimuth, height=10, tz='US/Eastern'):
+    def __init__(
+        self,
+        lat,
+        lon,
+        azimuth,
+        height=10,
+        tz='US/Eastern',
+        use_de430=True,
+        tol=2,
+        min_alt=0,
+        max_alt=15,
+    ):
         self.lat = lat
+        self.use_de430 = use_de430
         self.lon = lon
         self.azimuth = azimuth
         self.loc = EarthLocation(lat=self.lat * u.deg, lon=self.lon * u.deg, height=height * u.m)
         self.fine = None
         self.tz = tz
+        self.tol = tol
+        self.low_az = self.azimuth - tol
+        self.hi_az = self.azimuth + tol
+        self.min_alt = min_alt
+        self.max_alt = max_alt
+
+    def get_sun(self, times):
+        if self.use_de430:
+            print('using de430')
+            solar_system_ephemeris.set('de430')
+            return get_body('sun', times)
+        return get_sun(times)
 
     def coarse_run(self):
         start_time = Time(datetime.datetime.now())
         time_deltas = np.linspace(0, 365, 50000) * u.day
         times = start_time + time_deltas
         frames = AltAz(obstime=times, location=self.loc)
-        alts = get_sun(times).transform_to(frames)
-        low_az = self.azimuth - 3  # noqa: F841
-        hi_az = self.azimuth + 3  # noqa: F841
+        alts = self.get_sun(times).transform_to(frames)
+        low_az = self.azimuth - self.tol * 1.5
+        hi_az = self.azimuth + self.tol * 1.5
+
         self.coarse = (
-            alts.to_table().to_pandas().query('(0 < alt < 15) and (@low_az < az < @hi_az)')
+            alts.to_table()
+            .to_pandas()
+            .query('(0 <= alt < @self.max_elevation) and (@self.low_az < az < @self.hi_az)')
         )
 
     def high_res_run(self):
@@ -45,13 +72,13 @@ class BadSun:
             times = day + time_deltas
             frames = AltAz(obstime=times, location=self.loc)
             alts = get_sun(times).transform_to(frames)
-            low_az = self.azimuth - 2  # noqa: F841
-            hi_az = self.azimuth + 2  # noqa: F841
             fine.append(
                 pl.from_pandas(
                     alts.to_table()
                     .to_pandas()
-                    .query('(-.01 <= alt < 15) and (@low_az < az < @hi_az)')
+                    .query(
+                        '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
+                    )
                 )
             )
         self.fine = pl.concat(fine)
