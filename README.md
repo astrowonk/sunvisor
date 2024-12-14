@@ -1,8 +1,8 @@
 
 
-This module uses `astropy` to compute when the sun is low on the horizon in a specific direction. I wrote it because the once the sun was very low and right in my eyes when driving down a local road, and wanted to know when during the evening that would happen.
+This module uses `astropy` to compute when the sun is low on the horizon in a specific direction. I wrote it because recently I drove down a local road directly into the setting, and I wanted to know when during the evening that would happen and for how much longer.
 
-However, it could be used for more fun things like finding a sunset that lines up with a particular monument.
+However, it could be used for fun uses like finding a sunset that lines up with a particular monument.
 
 **Install**
 
@@ -37,3 +37,4 @@ bs.gt()
 
 * Make `great_tables` an optional requirement.
 * A command line interface with options for generating CSV.
+* Find moonrise/moonset times in addition to the sun.
