@@ -14,17 +14,17 @@ class BadSun:
     fine = None
     coarse = None
 
-    def __init__(self, lat, lon, azimuth, tz='US/Eastern'):
+    def __init__(self, lat, lon, azimuth, height=10, tz='US/Eastern'):
         self.lat = lat
         self.lon = lon
         self.azimuth = azimuth
-        self.loc = EarthLocation(lat=self.lat * u.deg, lon=self.lon * u.deg, height=20 * u.m)
+        self.loc = EarthLocation(lat=self.lat * u.deg, lon=self.lon * u.deg, height=height * u.m)
         self.fine = None
         self.tz = tz
 
     def coarse_run(self):
         start_time = Time(datetime.datetime.now())
-        time_deltas = np.linspace(0, 365, 24000) * u.day
+        time_deltas = np.linspace(0, 365, 50000) * u.day
         times = start_time + time_deltas
         frames = AltAz(obstime=times, location=self.loc)
         alts = get_sun(times).transform_to(frames)
