@@ -4,13 +4,13 @@ This module uses `astropy` to compute when the sun is low on the horizon in a sp
 
 However, it could be used for more fun things like finding a sunset that lines up with a particular monument.
 
-**INSTALLATION**
+**Install**
 
-Clone this repository and then pip should work. Requirements are `astropy`, `pandas`, `polars` and `great_tables`. I may make `great_tables` optional at some point.
+Clone this repository and then pip should work. Requirements are `astropy`, `pandas`, `polars` and `great_tables`.
 
 `pip install .`
 
-**USAGE**
+**Usage**
 
 Here is simple example to make a table for [Manhattanhenge](https://www.amnh.org/research/hayden-planetarium/manhattanhenge), when the sun lines up with the east west grid of the city.
 
@@ -33,3 +33,7 @@ bs.gt()
 
 ```
 
+** Possible future plans
+
+* Make `great_tables` an optional requirement.
+* A command line interface with options for generating CSV.
