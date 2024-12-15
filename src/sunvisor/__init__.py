@@ -69,19 +69,20 @@ class LowSun:
         # self.coarse['day']
         for _day in tqdm(self.coarse.drop_duplicates(subset=['_day'])['obstime']):
             day = Time(_day)
-            time_deltas = np.linspace(-2, 2, 120) * u.hour
+            time_deltas = np.linspace(-1, 1, 60) * u.hour
             times = day + time_deltas
             frames = AltAz(obstime=times, location=self.loc)
             alts = get_sun(times).transform_to(frames)
-            fine.append(
-                pl.from_pandas(
-                    alts.to_table()
-                    .to_pandas()
-                    .query(
-                        '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
-                    )
+            dfpandas = alts.to_table().to_pandas()
+            print(dfpandas['obstime'].agg(['min', 'max']))
+            pldf = pl.from_pandas(
+                dfpandas.query(
+                    '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
                 )
             )
+            print(pldf['obstime'].min())
+            # print(pldf.select(pl.col('ob')))
+            fine.append(pldf)
         self.fine = pl.concat(fine)
 
     def make_summary_table(self):
