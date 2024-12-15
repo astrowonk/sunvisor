@@ -27,7 +27,14 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pandas", "astropy", "polars", "great_tables", "tqdm"]
+dependencies = [
+    "pandas",
+    "astropy",
+    "polars",
+    "great_tables",
+    "tqdm",
+    "jplephem",
+]
 
 [project.urls]
 Documentation = "https://github.com/astrowonk/sunvisor/#readme"
