@@ -48,7 +48,7 @@ class LowSun:
 
     def coarse_run(self):
         start_time = Time(datetime.datetime.now())
-        time_deltas = np.linspace(0, 365, 50000) * u.day
+        time_deltas = np.linspace(0, 365, 43800) * u.day
         times = start_time + time_deltas
         frames = AltAz(obstime=times, location=self.loc)
         alts = self.get_sun(times).transform_to(frames)
@@ -74,13 +74,13 @@ class LowSun:
             frames = AltAz(obstime=times, location=self.loc)
             alts = get_sun(times).transform_to(frames)
             dfpandas = alts.to_table().to_pandas()
-            print(dfpandas['obstime'].agg(['min', 'max']))
+            # print(dfpandas['obstime'].agg(['min', 'max']))
             pldf = pl.from_pandas(
                 dfpandas.query(
                     '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
                 )
             )
-            print(pldf['obstime'].min())
+            #  print(pldf['obstime'].min())
             # print(pldf.select(pl.col('ob')))
             fine.append(pldf)
         self.fine = pl.concat(fine)
