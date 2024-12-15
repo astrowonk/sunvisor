@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sunvisor"
-version = "1.0"
+version = "1.0.1"
 description = 'Compute when the sun is in your eyes at sunrise/sunset'
 readme = "README.md"
 requires-python = ">=3.9"

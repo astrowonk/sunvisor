@@ -60,13 +60,14 @@ class LowSun:
             .to_pandas()
             .query('(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)')
         )
+        self.coarse['_day'] = self.coarse['obstime'].dt.floor('1d')
 
     def high_res_run(self):
         if self.coarse is None:
             self.coarse_run()
         fine = []
         # self.coarse['day']
-        for _day in tqdm(self.coarse['obstime']):
+        for _day in tqdm(self.coarse.drop_duplicates(subset=['_day'])['obstime']):
             day = Time(_day)
             time_deltas = np.linspace(-2, 2, 120) * u.hour
             times = day + time_deltas
