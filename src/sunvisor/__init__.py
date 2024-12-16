@@ -23,7 +23,7 @@ class LowSun:
         tz='US/Eastern',
         use_de430=True,
         tol=2,
-        min_alt=0,
+        min_alt=-0.5,
         max_alt=15,
     ):
         self.lat = lat
