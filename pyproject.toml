@@ -30,7 +30,6 @@ classifiers = [
 dependencies = [
     "pandas",
     "astropy",
-    "polars",
     "great_tables",
     "tqdm",
     "jplephem",
