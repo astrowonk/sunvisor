@@ -1,12 +1,35 @@
-from astropy.coordinates import get_sun, get_body
-import astropy.units as u
-from astropy.coordinates import AltAz, EarthLocation, SkyCoord, solar_system_ephemeris
-from astropy.time import Time
 import datetime
+
+import astropy.units as u
 import numpy as np
-import polars as pl
-from tqdm.autonotebook import tqdm
+import pandas as pd
+from astropy.coordinates import (
+    AltAz,
+    EarthLocation,
+    SkyCoord,
+    get_body,
+    get_sun,
+    solar_system_ephemeris,
+)
+from astropy.time import Time
 from great_tables import GT
+from tqdm.autonotebook import tqdm
+
+
+def flatten_columns(self):
+    """Monkey patchable function onto pandas dataframes to flatten multiindex column names from tuples. Especially useful
+    with plotly.
+    pd.DataFrame.flatten_columns = flatten_columns
+    """
+    df = self.copy()
+    df.columns = [
+        '_'.join([str(x) for x in [y for y in item if y]]) if not isinstance(item, str) else item
+        for item in df.columns
+    ]
+    return df
+
+
+pd.DataFrame.flatten_columns = flatten_columns
 
 
 class LowSun:
@@ -74,15 +97,14 @@ class LowSun:
             alts = self.get_sun(times).transform_to(frames)
             dfpandas = alts.to_table().to_pandas()
             # print(dfpandas['obstime'].agg(['min', 'max']))
-            pldf = pl.from_pandas(
-                dfpandas.query(
-                    '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
-                )
+            df = dfpandas.query(
+                '(@self.min_alt <= alt < @self.max_alt) and (@self.low_az < az < @self.hi_az)'
             )
+
             #  print(pldf['obstime'].min())
             # print(pldf.select(pl.col('ob')))
-            fine.append(pldf)
-        self.fine = pl.concat(fine)
+            fine.append(df)
+        self.fine = pd.concat(fine)
 
     def make_summary_table(self):
         """Use polars to make the summary table."""
@@ -92,22 +114,28 @@ class LowSun:
 
         fmt2 = '%-I:%M%p'
         fine = self.fine
-        fine = fine.with_columns(
-            pl.col('obstime').dt.replace_time_zone('UTC').dt.convert_time_zone('US/Eastern')
+        fine = fine.assign(
+            obstime=lambda x: x['obstime'].dt.tz_localize('UTC').dt.tz_convert('US/Eastern')
         )
+        fine['Day'] = fine['obstime'].dt.floor('1d')
         self.summary_table_data = (
-            fine.with_columns(Day=pl.col('obstime').dt.truncate('1d').dt.strftime('%Y %b %-d'))
-            .group_by(['Day'])
-            .agg(
-                pl.col('obstime').min().dt.strftime(fmt2).alias('start_str'),
-                pl.col('obstime').max().dt.strftime(fmt2).alias('end_str'),
-                pl.col('alt').max().alias('Max Alt'),
-                pl.col('alt').min().alias('Min Alt'),
-                pl.col('obstime').min().alias('start'),
-                pl.col('obstime').max().alias('end'),
-            )
-            .with_columns((pl.col('start_str') + ' -> ' + pl.col('end_str')).alias(header_name))
-            .sort('start')
+            fine.groupby(['Day'])[['obstime', 'alt']].agg(['min', 'max']).flatten_columns()
+        ).reset_index()
+        self.summary_table_data['start_str'] = self.summary_table_data['obstime_min'].dt.strftime(
+            fmt2
+        )
+        self.summary_table_data['end_str'] = self.summary_table_data['obstime_max'].dt.strftime(
+            fmt2
+        )
+        self.summary_table_data['Times'] = (
+            self.summary_table_data['start_str'] + ' -> ' + self.summary_table_data['end_str']
+        )
+        self.summary_table_data = self.summary_table_data.rename(
+            {
+                'alt_min': 'Min Alt',
+                'alt_max': 'Max Alt',
+            },
+            axis=1,
         )
 
     def summary_table(self, return_all=False):
@@ -116,15 +144,15 @@ class LowSun:
             self.make_summary_table()
         header_name = 'Times'
         cols = ['Day', header_name] if not return_all else self.summary_table_data.columns
-        return self.summary_table_data.select(cols)
+        return self.summary_table_data[cols]
 
     def gt(self):
         """Make GT Table"""
         if self.summary_table_data is None:
             self.make_summary_table()
         data = self.summary_table_data.rename(
-            {'start_str': 'Start', 'end_str': 'End', 'Min Alt': 'Min', 'Max Alt': 'Max'}
-        ).select(['Day', 'Start', 'End', 'Min', 'Max'])
+            columns={'start_str': 'Start', 'end_str': 'End', 'Min Alt': 'Min', 'Max Alt': 'Max'}
+        )[['Day', 'Start', 'End', 'Min', 'Max']]
         degree_sign = '\N{DEGREE SIGN}'
         return (
             GT(data)
