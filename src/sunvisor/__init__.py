@@ -41,7 +41,6 @@ class LowSun:
 
     def get_sun(self, times):
         if self.use_de430:
-            print('using de430')
             solar_system_ephemeris.set('de430')
             return get_body('sun', times)
         return get_sun(times)
@@ -72,7 +71,7 @@ class LowSun:
             time_deltas = np.linspace(-1, 1, 60) * u.hour
             times = day + time_deltas
             frames = AltAz(obstime=times, location=self.loc)
-            alts = get_sun(times).transform_to(frames)
+            alts = self.get_sun(times).transform_to(frames)
             dfpandas = alts.to_table().to_pandas()
             # print(dfpandas['obstime'].agg(['min', 'max']))
             pldf = pl.from_pandas(
