@@ -70,7 +70,7 @@ class LowSun:
 
     def coarse_run(self, days=365):
         start_time = Time(datetime.datetime.now())
-        time_deltas = np.linspace(0, 365, days * 24 * 6) * u.day
+        time_deltas = np.linspace(0, days, days * 24 * 6) * u.day
         times = start_time + time_deltas
         frames = AltAz(obstime=times, location=self.loc)
         alts = self.get_sun(times).transform_to(frames)
